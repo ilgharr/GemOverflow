@@ -35,7 +35,7 @@ jobs:
       - name: Checkout Tester
         uses: actions/checkout@v4
         with:
-          repository: seneca-dsa456-s24/testers
+          repository: seneca-dsa456-f24/testers
           token: ${{ secrets.TESTER_ACCESS }}
           path: ./tester
 
