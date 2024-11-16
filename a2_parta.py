@@ -1,4 +1,4 @@
-#    Main Author(s): 
+#    Main Author(s): Sheida Hashem Dabbaghian
 #    Main Reviewer(s):
 
 class HashTable:
