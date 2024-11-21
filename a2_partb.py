@@ -1,47 +1,114 @@
-# Main Author:
+# Main Author: Ilghar Rahno 137542213
 # Main Reviewer:
 
 # This function duplicates and returns the board. You may find this useful
 def copy_board(board):
-        current_board = []
-        height = len(board)
-        for i in range(height):
-            current_board.append(board[i].copy())
-        return current_board
+    current_board = []
+    height = len(board)
+    for i in range(height):
+        current_board.append(board[i].copy())
+    return current_board
 
+def evaluate_board(board, player):
+    player_pieces = 0
+    opponent_pieces = 0
 
-# this function is your evaluation function for the board
-def evaluate_board (board, player):
-    return 0
+    for row in board:
+        for cell in row:
+            if cell > 0:
+                if player == 1:
+                    player_pieces += cell
+                else:
+                    opponent_pieces += cell
+            elif cell < 0:
+                if player == -1:
+                    player_pieces -= cell
+                else:
+                    opponent_pieces -= cell
+
+    if opponent_pieces == 0 and player_pieces > 0:
+        return float('inf')
+
+    if player_pieces == 0 and opponent_pieces > 0:
+        return float('-inf')
+
+    return player_pieces - opponent_pieces if player == 1 else opponent_pieces - player_pieces
 
 class GameTree:
     class Node:
-        def __init__(self, board, depth, player, tree_height = 4):
-            pass
+        def __init__(self, board, depth, player, tree_height=4):
+            self.board = copy_board(board)
+            self.depth = depth
+            self.player = player
+            self.tree_height = tree_height
+            self.children = []
+            self.value = evaluate_board(board, player)
+
+            if depth < tree_height:
+                self.expand()
+
+        def expand(self):
+            next_player = 1 if self.player == -1 else -1
+            for move in self.get_possible_moves(self.board, self.player):
+                new_board = self.make_move(self.board, move, self.player)
+                self.children.append(GameTree.Node(new_board, self.depth + 1, next_player, self.tree_height))
+
+        def get_possible_moves(self, board, player):
+            possible_moves = []
+            rows = len(board)
+            cols = len(board[0]) if rows > 0 else 0
+            for r in range(rows):
+                for c in range(cols):
+                    if board[r][c] == 0:
+                        possible_moves.append((r, c))
+            return possible_moves
+
+        def make_move(self, board, move, player):
+            new_board = copy_board(board)
+            r, c = move
+            new_board[r][c] = player
+            return new_board
 
     def __init__(self, board, player, tree_height = 4):
         self.player = player
         self.board = copy_board(board)
-        # you will need to implement the creation of the game tree here.  After this function completes,
-        # a full game tree will be created.
-        # hint: as with many tree structures, you will need to define a self.root that points to the root
-        # of the game tree.  To create the tree itself, a recursive function will likely be the easiest as you will
-        # need to apply the minimax algorithm to its creation.
+        self.root = self.Node(board, 0, player, tree_height)
 
+    def minimax(self, node, depth, maximizing_player):
+        if depth == 0 or not node.children:
+            return node.value
 
-
-
-    # this function is a pure stub.  It is here to ensure the game runs.  Once you complete
-    # the GameTree, you will use it to determine what to return.
-    def get_move(self):
-        height = len(self.board)
-        width = len(self.board[0])
-        if self.player == 1:
-            return (0, 0)
+        if maximizing_player:
+            max_eval = float('-inf')
+            for child in node.children:
+                evl = self.minimax(child, depth - 1, False)
+                max_eval = max(max_eval, evl)
+            return max_eval
         else:
-            return (height-1, width-1)
-   
-    def clear_tree(self):
-        pass     
+            min_eval = float('inf')
+            for child in node.children:
+                evl = self.minimax(child, depth - 1, True)
+                min_eval = min(min_eval, evl)
+            return min_eval
 
-    
+    def get_move(self):
+        best_value = float('-inf') if self.player == 1 else float('inf')
+        best_move = None
+
+        for child in self.root.children:
+            evl = self.minimax(child, self.root.tree_height - self.root.depth, self.player == -1)
+
+            if (self.player == 1 and evl > best_value) or (self.player == -1 and evl < best_value):
+                best_value = evl
+                best_move = child
+
+        if best_move:
+            for r in range(len(self.board)):
+                for c in range(len(self.board[0])):
+                    if self.board[r][c] != best_move.board[r][c]:
+                        return (r, c + 1)
+
+        return None
+
+    def clear_tree(self):
+        self.root = None
