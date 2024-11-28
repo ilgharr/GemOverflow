@@ -75,7 +75,15 @@ class HashTable:
 		
 
 	def search(self, key):
-		pass
+		index = self.hash_function(key)
+		current = self.table[index]
+
+		while current is not None:
+			if current.key == key:
+				return current.value
+			current = current.next
+		return None
+		
 
 	def capacity(self):
 		pass
