@@ -86,8 +86,19 @@ class HashTable:
 		
 
 	def capacity(self):
-		pass
+		return self._capacity
+		
 
 	def __len__(self):
-		pass
+		old_table = self.table
+		self._capacity *= 2
+		self.table = [None] * self._capacity
+		self.size = 0
+
+		for node in old_table:
+			current = node
+			while current is not None:
+				self.insert(current.key, current.value)
+				current = current.next
+		
 
