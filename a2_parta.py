@@ -45,10 +45,34 @@ class HashTable:
 
 
 	def modify(self, key, value):
+		index = self.hash_function(key)
+		current = self.table[index]
+
+		while current is not None:
+			if current.key == key:
+				current.value = value
+				return True
+			current = current.next
+		return False
 
 
 	def remove(self, key):
-		pass
+		index = self.hash_function(key)
+		current = self.table[index]
+		prev = None
+
+		while current is not None:
+			if current.key == key:
+				if prev is None:
+					self.table[index] = current.next
+				else:
+					prev.next = current.next
+				self.size -= 1
+				return True
+			prev = current
+			current = current.next
+		return False
+		
 
 	def search(self, key):
 		pass
