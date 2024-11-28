@@ -9,8 +9,6 @@ class HashTable:
 			self.value = value
 			self.next = None
 
-	# You cannot change the function prototypes below.  Other than that
-	# how you implement the class is your choice as long as it is a hash table
 
 	def __init__(self, cap=32):
 		# Set the initial capacity of the hash table
