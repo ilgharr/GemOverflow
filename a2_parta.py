@@ -20,9 +20,6 @@ class HashTable:
 		return hash(key) % self._capacity
 
 	def insert(self,key, value):
-		pass
-
-	def modify(self, key, value):
 		if self.search(key) is not None:
 			return False
 
@@ -45,7 +42,10 @@ class HashTable:
 
 		return True
 
-	
+
+
+	def modify(self, key, value):
+
 
 	def remove(self, key):
 		pass
