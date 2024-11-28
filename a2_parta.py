@@ -57,7 +57,7 @@ class HashTable:
 		current = self.table[index]
 
 		# Traverse the linked list to find the matching key
-		while current is not None:
+		while current:
 			if current.key == key:
 				# Update the value and return True
 				current.value = value
