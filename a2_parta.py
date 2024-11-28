@@ -90,6 +90,9 @@ class HashTable:
 		
 
 	def __len__(self):
+		return self.size
+
+	def resize(self):
 		old_table = self.table
 		self._capacity *= 2
 		self.table = [None] * self._capacity
