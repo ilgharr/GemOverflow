@@ -16,11 +16,36 @@ class HashTable:
 		self.table = [None] * self._capacity
 		self.size = 0
 
+	def hash_function(self, key):
+		return hash(key) % self._capacity
+
 	def insert(self,key, value):
 		pass
 
 	def modify(self, key, value):
-		pass
+		if self.search(key) is not None:
+			return False
+
+		index = self.hash_function(key)
+		new_node = self.Node(key, value)
+
+		if self.table[index] is None:
+			self.table[index] = new_node
+
+		else:
+			current = self.table[index]
+			while current.next is not None:
+				current = current.next
+
+			current.next = new_node
+
+		self.size += 1
+		if self.size / self._capacity > 0.7:
+			self.resize()
+
+		return True
+
+	
 
 	def remove(self, key):
 		pass
