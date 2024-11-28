@@ -1,5 +1,5 @@
 #    Main Author(s): Sheida Hashem Dabbaghian
-#    Main Reviewer(s):
+#    Main Reviewer(s): Kage Gamis
 
 class HashTable:
 	class Node:
@@ -23,7 +23,7 @@ class HashTable:
 		return hash(key) % self._capacity
 
 	def insert(self,key, value): # Insert a new key-value pair into the hash table
-		if self.search(key) is not None:
+		if self.search(key):
 			# If the key already exists, do not insert and return False
 			return False
 		
@@ -37,7 +37,7 @@ class HashTable:
 		else:
 			# If a collision occurs, use chaining to add the node to the end of the linked list
 			current = self.table[index]
-			while current.next is not None:
+			while current.next:
 				current = current.next
 
 			current.next = new_node
@@ -73,7 +73,7 @@ class HashTable:
 		current = self.table[index]
 		prev = None
 
-		while current is not None:
+		while current:
 			# Traverse the linked list to find the matching key
 			if current.key == key:
 				if prev is None:
@@ -95,7 +95,7 @@ class HashTable:
 		# Start at the head of the linked list at the index
 		current = self.table[index]
 
-		while current is not None:
+		while current:
 			# Traverse the linked list to find the matching key
 			if current.key == key:
 				# Return the value if the key is found
@@ -122,7 +122,7 @@ class HashTable:
 		# Insert again all nodes from the old table into the new table
 		for node in old_table:
 			current = node
-			while current is not None:
+			while current:
 				self.insert(current.key, current.value)
 				current = current.next
 		
