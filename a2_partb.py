@@ -1,5 +1,5 @@
 # Main Author: Ilghar Rahno 137542213
-# Main Reviewer:
+# Main Reviewer: Kage Gamis
 
 # This function duplicates and returns the board.
 def copy_board(board):
