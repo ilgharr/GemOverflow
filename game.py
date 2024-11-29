@@ -8,6 +8,8 @@
 #   https://opengameart.org/content/rotating-crystal-animation-8-step,
 #   https://creativecommons.org/licenses/by/3.0/
 
+# Enhancements author: Kage Gamis
+
 import pygame
 import sys
 import math
@@ -51,6 +53,7 @@ class Board:
         self.board[0][0] = 1
         self.board[self.height-1][self.width-1] = -1
         self.turn = 0
+        self.time_limit = 5  # 5 seconds per move
 
     def get_board(self):
         current_board = []
@@ -150,8 +153,6 @@ class Board:
                         window.blit(sprite[math.floor(frame)], (cpos, rpos))
 
 
-
-
 # Constants
 GRID_SIZE = (5, 6)
 CELL_SIZE = 100
@@ -205,20 +206,47 @@ bots = [PlayerOne(), PlayerTwo()]
 grid_col = -1
 grid_row = -1
 choice = [None, None]
+
+# Initialize start_ticks outside the loop to keep track of time
+start_ticks = 0  #  init the start time of the turn
+
+# Reset button rectangle
+reset_button_rect = pygame.Rect(900, 170, 200, 50)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        else:
-            player1_dropdown.handle_event(event)
-            player2_dropdown.handle_event(event)
-            choice[0] = player1_dropdown.get_choice()
-            choice[1] = player2_dropdown.get_choice()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x,y = event.pos
-                row = y - Y_OFFSET
-                col = x - X_OFFSET    
-                grid_row, grid_col = row // CELL_SIZE, col // CELL_SIZE
+        #     reset game if reset button is clicked
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = event.pos
+            # Check if the mouse click is inside the reset button area
+            if reset_button_rect.collidepoint(x, y):
+                print("Resetting game")  # Debugging line
+                board = Board(GRID_SIZE[1], GRID_SIZE[0], p1_sprites, p2_sprites)
+                current_player = 0
+                has_winner = False
+                overflowing = False
+                overflow_boards = Queue()
+                numsteps = 0
+                grid_col = -1
+                grid_row = -1
+                choice = [None, None]
+                start_ticks = 0
+                status = ["", ""]
+                player1_dropdown = Dropdown(900, 50, 200, 50, ['Human', 'AI'])
+                player2_dropdown = Dropdown(900, 110, 200, 50, ['Human', 'AI'])
+
+            else:
+                player1_dropdown.handle_event(event)
+                player2_dropdown.handle_event(event)
+                choice[0] = player1_dropdown.get_choice()
+                choice[1] = player2_dropdown.get_choice()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x,y = event.pos
+                    row = y - Y_OFFSET
+                    col = x - X_OFFSET
+                    grid_row, grid_col = row // CELL_SIZE, col // CELL_SIZE
 
     win = board.check_win()
     if win != 0:
@@ -246,6 +274,12 @@ while running:
         else:
             status[0] = "Player " + str(current_player + 1) + "'s turn"
             make_move = False
+
+            # Start the timer when it's the player's turn
+            if start_ticks == 0:  # Initialize the timer when the turn begins
+                start_ticks = pygame.time.get_ticks()
+
+            # Check if it is the AI's turn
             if choice[current_player] == 1:
                 (grid_row,grid_col) = bots[current_player].get_play(board.get_board())
                 status[1] = "Bot chose row {}, col {}".format(grid_row, grid_col)
@@ -255,10 +289,20 @@ while running:
                        winner = ((current_player + 1) % 2) + 1 
                 else:
                     make_move = True
+                    start_ticks = 0  # Reset timer after move made
             else:
                 if board.valid_move(grid_row, grid_col, player_id[current_player]):
                     make_move = True
+                    start_ticks = 0  # Reset timer after move made
 
+            # Check if the 3-second timeout has passed
+            elapsed_time = pygame.time.get_ticks() - start_ticks  # Get elapsed time in milliseconds
+            if elapsed_time >= 5000 and start_ticks != 0:  # If 3 seconds have passed
+                status[1] = "Time's up! Player " + str(current_player + 1) + " loses turn."
+                current_player = (current_player + 1) % 2  # Switch to the other player
+                start_ticks = 0  # Reset the timer after switching turns
+
+            # If the player made a valid move within 3 seconds
             if make_move:
                 board.add_piece(grid_row, grid_col, player_id[current_player])
                 numsteps = board.do_overflow(overflow_boards)
@@ -268,7 +312,8 @@ while running:
                 else:
                     current_player = (current_player + 1) % 2
                 grid_row = -1
-                grid_col = -1   
+                grid_col = -1
+                start_ticks = 0  # Reset timer after a successful move
 
     # Draw the game board
     window.fill(WHITE)
@@ -279,16 +324,26 @@ while running:
     player1_dropdown.draw(window)
     player2_dropdown.draw(window)
 
-    if not has_winner:  
+    # draw reset button as with black fill with white text
+    pygame.draw.rect(window, BLACK, (900, 170, 200, 50), 0)
+    font = pygame.font.Font(None, 36)
+    text = font.render("Reset", 1, WHITE)
+    window.blit(text, (950, 175))
+
+    if not has_winner:
         text = font.render(status[0], True, (0, 0, 0))  # Black color
         window.blit(text, (X_OFFSET, 750 ))
         text = font.render(status[1], True, (0, 0, 0))  # Black color
         window.blit(text, (X_OFFSET,  700 ))
+
+        # Draw the time remaining for the player
+        elapsed_time = pygame.time.get_ticks() - start_ticks  # Time in milliseconds
+        seconds = elapsed_time // 1000
+        time_text = font.render("Time: " + str(5 - seconds) + "s", True, BLACK)  # Display countdown
+        window.blit(time_text, (window.get_width() - 950, 625))
     else:
         text = bigfont.render("Player " + str(winner)  + " wins!", True, (0, 0, 0))  # Black color
         window.blit(text, (300, 250))
-
-
 
     pygame.display.update()
     pygame.time.delay(100)
