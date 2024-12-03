@@ -2,6 +2,7 @@
 
 Put link to your video demonstrating your feature here.  See assignment specs on what is required for this component
 
+[Video Link](https://seneca-my.sharepoint.com/:v:/g/personal/kjgamis_myseneca_ca/EaTG1B1lMLlDruu5ruEe-uUBiTuVQOySAzfMMgTMpOBRig?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=pwvcTc)
 
 ## Part C: Game Improvements
 
