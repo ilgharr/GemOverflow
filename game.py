@@ -107,6 +107,13 @@ class Board:
             for col in range(self.width):
                 self.board[row][col] = newboard[row][col]
 
+    # reset bpard for next game
+    def reset(self):
+        for row in range(self.height):
+            for col in range(self.width):
+                self.board[row][col] = 0
+        self.turn = 0
+
     def draw(self, window, frame):
         for row in range(GRID_SIZE[0]):
             for col in range(GRID_SIZE[1]):
@@ -195,6 +202,7 @@ player2_dropdown = Dropdown(900, 110, 200, 50, ['Human', 'AI'])
 
 status=["",""]
 current_player = 0
+player_scores = [0, 0]  # Player 1 and Player 2 scores
 board = Board(GRID_SIZE[1], GRID_SIZE[0], p1_sprites, p2_sprites)
 # Game loop
 running = True
@@ -206,6 +214,7 @@ bots = [PlayerOne(), PlayerTwo()]
 grid_col = -1
 grid_row = -1
 choice = [None, None]
+tournament_winner = False
 
 # Initialize start_ticks outside the loop to keep track of time
 start_ticks = 0  #  init the start time of the turn
@@ -222,9 +231,11 @@ while running:
             x, y = event.pos
             # Check if the mouse click is inside the reset button area
             if reset_button_rect.collidepoint(x, y):
-                print("Resetting game")  # Debugging line
                 board = Board(GRID_SIZE[1], GRID_SIZE[0], p1_sprites, p2_sprites)
+                status = ["", ""]
                 current_player = 0
+                player_scores = [0, 0]
+                tournament_winner = False
                 has_winner = False
                 overflowing = False
                 overflow_boards = Queue()
@@ -233,9 +244,6 @@ while running:
                 grid_row = -1
                 choice = [None, None]
                 start_ticks = 0
-                status = ["", ""]
-                player1_dropdown = Dropdown(900, 50, 200, 50, ['Human', 'AI'])
-                player2_dropdown = Dropdown(900, 110, 200, 50, ['Human', 'AI'])
 
             else:
                 player1_dropdown.handle_event(event)
@@ -251,9 +259,18 @@ while running:
     win = board.check_win()
     if win != 0:
         winner = 1
+        player_scores[0] = player_scores[0] + 1
         if win == -1:
             winner = 2
+            player_scores[1] = player_scores[1] + 1
         has_winner = True
+
+        if player_scores[0] == 3:
+            tournament_winner = 1  # Player 1 wins the tournament
+        elif player_scores[1] == 3:
+            tournament_winner = 2  # Player 2 wins the tournament
+
+        board.reset()
 
     if not has_winner:
         if overflowing:
@@ -330,6 +347,23 @@ while running:
     text = font.render("Reset", 1, WHITE)
     window.blit(text, (950, 175))
 
+    # draw the scoreboard
+    pygame.draw.rect(window, BLACK, (900, 300, 200, 100), 2)
+    text = font.render("Score", 1, BLACK)
+    window.blit(text, (910, 305))
+
+    # Display the scores
+    text = font.render("Player 1:       " + str(player_scores[0]), 1, BLACK)
+    window.blit(text, (910, 335))
+    text = font.render("Player 2:       " + str(player_scores[1]), 1, BLACK)
+    window.blit(text, (910, 365))
+
+    # Display tournament instructions
+    text = font.render("The first player to score", 1, BLACK)
+    window.blit(text, (850, 500))
+    text = font.render("3pts wins the tournament", 1, BLACK)
+    window.blit(text, (850, 525))
+
     if not has_winner:
         text = font.render(status[0], True, (0, 0, 0))  # Black color
         window.blit(text, (X_OFFSET, 750 ))
@@ -344,6 +378,23 @@ while running:
     else:
         text = bigfont.render("Player " + str(winner)  + " wins!", True, (0, 0, 0))  # Black color
         window.blit(text, (300, 250))
+        if tournament_winner:
+            text = bigfont.render("Game Over!", True, (0, 0, 0))
+            window.blit(text, (300, 350))
+        else:
+            # reset board for next game after 3 seconds
+            pygame.display.update()
+            board = Board(GRID_SIZE[1], GRID_SIZE[0], p1_sprites, p2_sprites)
+            status = ["", ""]
+            current_player = 0
+            has_winner = False
+            overflowing = False
+            overflow_boards = Queue()
+            numsteps = 0
+            grid_col = -1
+            grid_row = -1
+            choice = [None, None]
+            start_ticks = 0
 
     pygame.display.update()
     pygame.time.delay(100)
