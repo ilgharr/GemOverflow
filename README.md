@@ -50,8 +50,11 @@ Develop and implement a **Game Tree** to create an AI bot that selects the optim
 
 1. Clone the repository:
    ```bash
-   git clone <REPO_LINK>
-   cd <REPO_DIRECTORY>
+   git clone git@github.com:ilgharr/GemOverflow.git
+                    OR
+   git clone https://github.com/ilgharr/GemOverflow.git
+   
+   cd GemOverflow
    ```
 2. Run the game:
    ```bash
